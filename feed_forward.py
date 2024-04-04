@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 class FeedForward(nn.Module):
     """
     The FeedForward class represents the feed-forward neural network component commonly found in transformer-based models. This component consists of two linear layers with a GELU activation function and dropout applied in between.

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import List
 
 class AttentionHead(nn.Module):
     """
@@ -72,9 +73,6 @@ class AttentionHead(nn.Module):
 
         return n_value
 
-import torch
-import torch.nn as nn
-from typing import List
 
 class MultiHeadAttention(nn.Module):
     """

@@ -1,24 +1,24 @@
-#import torch
-#from torch.optim import Adam
-#from torch.utils.data import DataLoader
-#from scheduled_optim import ScheduledOptim
-#import random as rd
-#import numpy as np
-#import argparse
-#from dataset import CustomTextDataset
-#from trainer import T5Trainer
+import torch
+from torch.optim import Adam
+from torch.utils.data import DataLoader
+from scheduled_optim import ScheduledOptim
+import random as rd
+import numpy as np
+import argparse
+from dataset import CustomTextDataset
+from trainer import T5Trainer
 
 def set_seeds(config):
     """
-    Sets the seed for random number generators in Python's `random` module, NumPy, and PyTorch to ensure reproducible results. 
-    If CUDA is available and specified in the configuration, it also sets the seed for CUDA's random number generator and 
+    Sets the seed for random number generators in Python's `random` module, NumPy, and PyTorch to ensure reproducible results.
+    If CUDA is available and specified in the configuration, it also sets the seed for CUDA's random number generator and
     makes CUDA's operations deterministic.
 
-    This function is crucial for experiments where reproducibility is important, as it ensures that the model initialization, 
+    This function is crucial for experiments where reproducibility is important, as it ensures that the model initialization,
     data shuffling, and other operations that rely on random number generation can be replicated exactly.
 
     Args:
-        config (Config): A configuration object containing at least a `seed` attribute and a `with_cuda` boolean indicating 
+        config (Config): A configuration object containing at least a `seed` attribute and a `with_cuda` boolean indicating
                          whether CUDA-specific seeds need to be set for reproducibility.
     """
     rd.seed(config.seed)
@@ -32,21 +32,21 @@ def set_seeds(config):
 
 def run(config):
     """
-    The main function that sets up the environment, loads the dataset, initializes the T5 model along with its optimizer and 
+    The main function that sets up the environment, loads the dataset, initializes the T5 model along with its optimizer and
     scheduler, and then runs the training and testing loops according to the provided configuration.
 
-    This function serves as the entry point for training the T5 model, orchestrating the process from dataset preparation 
-    to model training and evaluation. It leverages the `T5Trainer` class to abstract away the complexities of the training 
+    This function serves as the entry point for training the T5 model, orchestrating the process from dataset preparation
+    to model training and evaluation. It leverages the `T5Trainer` class to abstract away the complexities of the training
     and testing loops.
 
     Args:
-        config (Config): A configuration object containing all necessary parameters to initialize datasets, the model, 
-                         optimizer, scheduler, and other components of the training process. This includes dataset paths, 
+        config (Config): A configuration object containing all necessary parameters to initialize datasets, the model,
+                         optimizer, scheduler, and other components of the training process. This includes dataset paths,
                          model hyperparameters, training options, device configuration, etc.
 
     Note:
         This function is designed to be called directly from the command line or as part of a script. It reads the configuration,
-        prepares the datasets, sets the computational device, initializes the model and its components, and finally starts the 
+        prepares the datasets, sets the computational device, initializes the model and its components, and finally starts the
         training process followed by testing, if a test dataset is provided.
     """
     # Set random seeds
@@ -106,11 +106,11 @@ if __name__ == "__main__":
         num_buckets= 32,
         max_distance= 128,
         data_dir= 'dataset/train.txt',
-        hidden_size= 128,
+        hidden_size= 768,
         vocab_size= 32000,
         hidden_dropout_prob= 0.1,
-        num_heads= 1,
-        num_blocks= 3,
+        num_heads= 12,
+        num_blocks= 8,
         n_warmup_steps= 4000,
         weight_decay= 0.01,
         lr= 1e-4,

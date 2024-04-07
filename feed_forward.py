@@ -43,9 +43,9 @@ class FeedForward(nn.Module):
         Returns:
             torch.Tensor: The output tensor after passing through the feed-forward network.
         """
-        hidden_state = self.fc1(hidden_state)  # Linear transformation
-        hidden_state = F.gelu(hidden_state)  # Apply GELU activation function
-        hidden_state = self.dropout(hidden_state)  # Apply dropout
-        hidden_state = self.fc2(hidden_state)  # Linear transformation
+        hidden_state = self.fc1(hidden_state)  
+        hidden_state = F.gelu(hidden_state) 
+        hidden_state = self.dropout(hidden_state) 
+        hidden_state = self.fc2(hidden_state)
         return hidden_state
 

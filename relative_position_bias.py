@@ -95,7 +95,7 @@ class RelativePositionBias(nn.Module):
 
         return values
 
- 
+
     def forward(self, qlen, klen):
         """
         Forward pass.
@@ -109,4 +109,3 @@ class RelativePositionBias(nn.Module):
         """
 
         return self.compute_bias(qlen, klen)
-

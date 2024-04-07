@@ -1,6 +1,6 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+#import torch
+#import torch.nn as nn
+#import torch.nn.functional as F
 
 class AttentionHead(nn.Module):
     """
@@ -51,7 +51,7 @@ class AttentionHead(nn.Module):
         value: torch.Tensor = self.value_weights(value)
 
         att_scores: torch.Tensor = (torch.matmul(query, key.transpose(1, 2)) + relative_biases) / self.head_dim ** 0.5
-        
+
         if mask is not None:
             if mask.dim() == 2:
                 # Padding mask case: [batch_size, seq_len]
@@ -66,37 +66,8 @@ class AttentionHead(nn.Module):
             # Apply mask - inf where mask == 0, keep original scores where mask != 0
             att_scores = att_scores.masked_fill(mask == 0, float('-inf'))
 
-
         att_weights: torch.Tensor = F.softmax(att_scores, dim=-1)
         att_weights: torch.Tensor = self.dropout(att_weights)
         n_value: torch.Tensor = torch.matmul(att_weights, value)
 
         return n_value
-        
-        
-class MultiHeadAttention(nn.Module):
-    """
-    Multi-head attention layer implementation.
-    """
-
-    def __init__(self, config):
-        """
-        Initializes the MultiHeadAttention layer.
-        """
-        super().__init__()
-        self.hidden_size: int = config.hidden_size
-        self.num_heads: int = config.num_heads
-        self.head_dim: int = self.hidden_size // self.num_heads
-        self.hidden_dropout_prob = config.hidden_dropout_prob
-        self.attention_heads: nn.ModuleList = nn.ModuleList([AttentionHead(self.hidden_size, self.head_dim, self.hidden_dropout_prob) for head_num in range(self.num_heads)])
-        self.fc: nn.Linear = nn.Linear(self.hidden_size, self.hidden_size)
-
-    def forward(self, query: torch.Tensor, key: torch.Tensor, value: torch.Tensor, relative_position_bias: torch.Tensor,
-                mask: torch.Tensor = None) -> torch.Tensor:
-        """
-        Applies multi-head attention mechanism to the input query, key, and value tensors.
-        """
-        attention_outputs: List[torch.Tensor] = [attention_head(query, key, value, mask=mask, relative_biases=relative_position_bias[:,i]) for i, attention_head in enumerate(self.attention_heads)]
-        hidden_state: torch.Tensor = torch.cat(attention_outputs, dim=-1)
-        hidden_state: torch.Tensor = self.fc(hidden_state)
-        return hidden_state

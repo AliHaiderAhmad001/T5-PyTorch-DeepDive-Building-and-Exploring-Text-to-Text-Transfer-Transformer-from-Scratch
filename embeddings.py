@@ -47,8 +47,7 @@ class Embeddings(nn.Module):
         Returns:
             torch.Tensor: The resulting tensor after applying embeddings, layer normalization, and dropout. This tensor is ready to be fed into subsequent layers of the model.
         """
-        x = self.token_embeddings(input_ids)  # Embedding lookup
-        x = self.norm(x)  # Apply layer normalization
-        x = self.dropout(x)  # Apply dropout
+        x = self.token_embeddings(input_ids)
+        x = self.norm(x)
+        x = self.dropout(x)
         return x
-

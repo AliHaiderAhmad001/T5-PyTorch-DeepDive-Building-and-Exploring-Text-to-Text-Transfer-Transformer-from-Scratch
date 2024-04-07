@@ -35,13 +35,13 @@ class T5Model(nn.Module):
     def __init__(self, config):
         super(T5Model, self).__init__()
 
-        self.num_blocks: int = config.num_blocks
+        self.num_blocks: int = 1#config.num_blocks
         self.vocab_size: int = config.vocab_size
         self.hidden_size: int = config.hidden_size
+        self.max_token_len: int = config.max_token_len
 
         self.embed_layer: Embeddings = Embeddings(config)
         self.relative_position_bias = RelativePositionBias(config)
-        self.biases = self.relative_position_bias(config.max_token_len, config.max_token_len).to(self.embed_layer.token_embeddings.weight.device)
 
         self.encoder: nn.ModuleList = nn.ModuleList([Encoder(config) for _ in range(self.num_blocks)])
         self.decoder: nn.ModuleList = nn.ModuleList([Decoder(config) for _ in range(self.num_blocks)])
@@ -63,33 +63,18 @@ class T5Model(nn.Module):
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: The logits representing the model's predictions for the next token in the sequence.
         """
-        print(self.embed_layer.token_embeddings.weight.device)
-        print(self.biases.device)
         x_enc: torch.Tensor  = self.embed_layer(input_ids)
         x_dec: torch.Tensor  = self.embed_layer(labels)
+        biases = self.relative_position_bias(self.max_token_len, self.max_token_len)
 
         for encoder_layer in self.encoder:
-            x_enc: torch.Tensor = encoder_layer(x_enc, self.biases, mask)
+            x_enc: torch.Tensor = encoder_layer(x_enc, biases, mask)
 
         for decoder_layer in self.decoder:
-            x_dec = decoder_layer(x_dec, x_enc, self.biases, mask)
+            x_dec = decoder_layer(x_dec, x_enc, biases, mask)
 
         x_logits: torch.Tensor = self.prediction_layer(x_dec)
 
         return self.softmax(x_logits)
-
-    def to(self, *args, **kwargs):
-        """
-        Ensures the model and its components are moved to the specified device. This method is particularly necessary for moving tensors that are not automatically managed by PyTorch's `.to()` method.
-
-        Args:
-            *args: Positional arguments for the device specification.
-            **kwargs: Keyword arguments for the device specification.
-        """
-        super(T5Model, self).to(*args, **kwargs)
-        self.biases = self.biases.to(*args, **kwargs)
-        self.relative_position_bias.to(*args, **kwargs)
-        
-        return self
 
 

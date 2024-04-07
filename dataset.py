@@ -1,87 +1,74 @@
-class Config:
+from torch.utils.data import Dataset
+from transformers import T5TokenizerFast
+
+class CustomTextDataset(Dataset):
     """
-    Configuration class for the model and training.
+    A PyTorch Dataset class for handling custom text data.
 
     Args:
-        prop (float): Proportion of tokens to mask in each sentence. Default is 0.15.
-        tokenizer_path (str): Path to the tokenizer. Default is "bert-base-uncased".
-        max_token_len (int): Maximum sequence length. Default is 128.
-        data_dir (str): Directory containing the data file.
-
-        # Embeddings params
-        hidden_size (int): Size of the hidden layers. Default is 768.
-        vocab_size (int): Size of the vocabulary. Default is 30522.
-        hidden_dropout_prob (float): Dropout probability for hidden layers. Default is 0.1.
-
-        # Attention params
-        num_heads (int): Number of attention heads. Default is 8.
-
-        # model params
-        num_blocks (int): Number of blocks in the BERT model. Default is 12.
-
-        # Optimizer params
-        n_warmup_steps (int): Number of warmup steps for the optimizer. Default is 10000.
-        weight_decay (float): Weight decay for the optimizer. Default is 0.01.
-        lr (float): Learning rate for the optimizer. Default is 1e-4.
-        betas (tuple): Betas for the optimizer. Default is (0.9, 0.999).
-
-        # Trainer params
-        cuda_devices (list): List of CUDA devices. Default is None.
-        with_cuda (bool): Flag to use CUDA. Default is True.
-        log_freq (int): Logging frequency. Default is 10.
-        batch_size (int): Batch size for training. Default is 64.
-        save_path (str): Path to save model checkpoints. Default is 'tmp/checkpoints'.
-
-        # Run the model params
-        seed (int): Random seed for reproducibility. Default is 0.
-        test_dataset (str): Path to the test dataset or None. Default is None.
-        epochs (int): Number of training epochs. Default is 1.
+        filename (str): Path to the file containing the text data.
+        tokenizer (str or transformers.PreTrainedTokenizerFast, optional): Pre-trained tokenizer or tokenizer name to use for tokenization. Defaults to 't5-base'.
+        max_token_len (int, optional): Maximum length of tokens for encoding. Defaults to 512.
     """
-
-    def __init__(self, prop=0.15, tokenizer_path="t5-base", max_token_len=768, data_dir="dataset/train.txt",
-                 hidden_size=768, bidirectional = True, num_buckets = 32, max_distance = 128,
-                 vocab_size=32000, hidden_dropout_prob=0.1, num_heads=8, num_blocks=12,
-                 n_warmup_steps=10000, weight_decay=0.01, lr=1e-4, betas=(0.9, 0.999),
-                 cuda_devices=None, with_cuda=True, log_freq=10, batch_size=64, save_path='tmp/checkpoints',
-                 seed=0, test_dataset=None, epochs=1):
-
-        # Dataset params
-        self.prop = prop
-        self.tokenizer_path = tokenizer_path
+    def __init__(self, filename, tokenizer='t5-base', max_token_len=512):
+        self.tokenizer = T5TokenizerFast.from_pretrained(tokenizer)
+        self.items = []
         self.max_token_len = max_token_len
-        self.data_dir = data_dir
 
-        # Relative pos params
-        self.bidirectional = bidirectional
-        self.num_buckets = num_buckets
-        self.max_distance = max_distance
+        with open(filename, 'r', encoding='utf-8') as file:
+            while True:
+                encoder_in = file.readline().strip()
+                if not encoder_in:
+                    break
+                decoder_in = file.readline().strip()
+                decoder_out = file.readline().strip()
+                self.items.append((encoder_in, decoder_in, decoder_out))
 
-        # Embeddings params
-        self.hidden_size = hidden_size
-        self.vocab_size = vocab_size + 100 # We add 100 for the number of sentinals we use
-        self.hidden_dropout_prob = hidden_dropout_prob
+                _ = file.readline()
 
-        # Attention params
-        self.num_heads = num_heads
+    def __len__(self):
+        """
+        Returns the total number of samples in the dataset.
+        """
+        return len(self.items)
 
-        # BERT model params
-        self.num_blocks = num_blocks
+    def __getitem__(self, idx):
+        """
+        Retrieves a sample from the dataset by index.
 
-        # Optimizer params
-        self.n_warmup_steps = n_warmup_steps
-        self.weight_decay = weight_decay
-        self.lr = lr
-        self.betas = betas
+        Args:
+            idx (int): Index of the sample to retrieve.
 
-        # Trainer params
-        self.cuda_devices = cuda_devices
-        self.with_cuda = with_cuda
-        self.log_freq = log_freq
-        self.batch_size = batch_size
-        self.save_path = save_path
+        Returns:
+            dict: A dictionary containing the encoder and decoder inputs, attention mask, and labels.
+        """
+        encoder_in, decoder_in, decoder_out = self.items[idx]
 
-        # Run the model params
-        self.seed = seed
-        self.test_dataset = test_dataset
-        self.epochs = epochs
+        encoder_ids = self.tokenizer(
+            encoder_in,
+            max_length=self.max_token_len,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        )
+        target_ids = self.tokenizer(
+            decoder_in,
+            max_length=self.max_token_len,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        ).input_ids
+        labels = self.tokenizer(
+            decoder_out,
+            max_length=self.max_token_len,
+            truncation=True,
+            padding="max_length",
+            return_tensors="pt"
+        ).input_ids
 
+        return {
+            "encoder_ids": encoder_ids["input_ids"].squeeze(),
+            "attention_mask": encoder_ids["attention_mask"].squeeze(),
+            "decoder_ids": target_ids.squeeze(),
+            "labels": labels.squeeze()
+        }

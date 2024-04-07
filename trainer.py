@@ -8,9 +8,9 @@ from t5_model import T5Model
 
 class T5Trainer:
     """
-    A trainer class for T5Model, designed to encapsulate the training and testing routines. It manages the training epochs, 
-    data loading, model optimization, and evaluation, providing a streamlined workflow for experimenting with the T5Model. 
-    The trainer supports both training and testing phases, handling the forward pass, loss computation, gradient backpropagation, 
+    A trainer class for T5Model, designed to encapsulate the training and testing routines. It manages the training epochs,
+    data loading, model optimization, and evaluation, providing a streamlined workflow for experimenting with the T5Model.
+    The trainer supports both training and testing phases, handling the forward pass, loss computation, gradient backpropagation,
     and parameter updates.
 
     Attributes:
@@ -85,6 +85,7 @@ class T5Trainer:
         avg_loss: float = 0.0
         i: int = 0
 
+        print("Number of batches in DataLoader:", len(data_iter))
 
         for batch in data_iter:
 
@@ -102,12 +103,7 @@ class T5Trainer:
             if train:
                 self.optim.zero_grad()
                 loss.backward()
-                print('$$$$$$$$$')
-                for name, param in self.model.named_parameters():
-                    if param.grad is not None:
-                        print(f"{name}: {param.grad.device}")
-
-                print('$$$$$$$$$')
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                 self.optim.step_and_update_lr()
 
             avg_loss += loss.item()
@@ -124,6 +120,8 @@ class T5Trainer:
                     post_fix['epoch'], post_fix['iter'], post_fix['avg_loss'], post_fix['loss']
                 )
                 print(output_str)
+
+            i += 1
 
         print("Epoch %d, %s, avg_loss=" % (epoch, str_code), avg_loss / len(data_iter))
 

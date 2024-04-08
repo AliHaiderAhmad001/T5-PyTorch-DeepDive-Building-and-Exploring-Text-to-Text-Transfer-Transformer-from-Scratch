@@ -1,12 +1,13 @@
 import torch
-from torch.optim import Adam
+import argparse
+import numpy as np
+import random as rd
+from trainer import T5Trainer
+from adafactor import AdaFactor 
+from dataset import CustomTextDataset
 from torch.utils.data import DataLoader
 from scheduled_optim import ScheduledOptim
-import random as rd
-import numpy as np
-import argparse
-from dataset import CustomTextDataset
-from trainer import T5Trainer
+
 
 def set_seeds(config):
     """
@@ -73,7 +74,11 @@ def run(config):
         t5: nn.DataParallel = nn.DataParallel(t5, device_ids=config.cuda_devices)
 
     # Initialize optimizer and scheduler
-    optim = Adam(t5.parameters(), lr=config.lr, betas=config.betas, weight_decay=config.weight_decay)
+    """To use a manual (external) learning rate schedule you should set scale_parameter=False and relative_step=False.
+      In T5 case, additional optimizer operations like gradient clipping should not be used alongside Adafactor. We also set warmup_init to False.
+      # https://discuss.huggingface.co/t/t5-finetuning-tips/684
+    """
+    optim = Adafactor(t5.parameters(), scale_parameter=False, relative_step=False, warmup_init=False, lr=None)  
     optim_schedule = ScheduledOptim(config, optim)
 
     # Create data loaders
@@ -111,9 +116,8 @@ if __name__ == "__main__":
         hidden_dropout_prob= 0.1,
         num_heads= 12,
         num_blocks= 8,
-        n_warmup_steps= 4000,
-        weight_decay= 0.01,
-        lr= 1e-4,
+        n_warmup_steps= 10000,
+        lr= 0.01,
         betas= (0.9, 0.999),
         cuda_devices=None,
         with_cuda= True,

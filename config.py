@@ -22,7 +22,6 @@ class Config:
         # Optimizer params
         n_warmup_steps (int): Number of warmup steps for the optimizer. Default is 10000.
         lr (float): Learning rate for the optimizer. Default is 1e-2.
-        betas (tuple): Betas for the optimizer. Default is (0.9, 0.999).
 
         # Trainer params
         cuda_devices (list): List of CUDA devices. Default is None.
@@ -69,7 +68,6 @@ class Config:
         # Optimizer params
         self.n_warmup_steps = n_warmup_steps
         self.lr = lr
-        self.betas = betas
 
         # Trainer params
         self.cuda_devices = cuda_devices

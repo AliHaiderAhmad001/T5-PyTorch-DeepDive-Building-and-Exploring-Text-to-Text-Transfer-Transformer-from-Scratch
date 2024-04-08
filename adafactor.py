@@ -1,7 +1,8 @@
+import math
 import torch
 from typing import Any, Dict, Tuple
 from torch.optim.optimizer import Optimizer
-from .types import OptFloat, OptLossClosure, Params, State
+from types import OptFloat, OptLossClosure, Params, State
 
 
 Eps2 = Tuple[float, float]

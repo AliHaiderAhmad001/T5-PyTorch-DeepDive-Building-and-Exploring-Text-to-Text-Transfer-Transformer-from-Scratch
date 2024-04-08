@@ -73,10 +73,9 @@ class ScheduledOptim:
 
       if step <= warmup:
           # Constant learning rate during warm-up phase
-          lr = 0.01 
+          lr = 0.01
       else:
-          # Decay phase starts after the warm-up
-          factor = self.d_model ** (-0.5)
-          lr = factor * ((step - warmup) ** -0.5) * (warmup ** 0.5)
+          # Decay phase: 1 / sqrt(max(n, k))
+          lr = 1 / max(step, warmup)**0.5
       
       return lr

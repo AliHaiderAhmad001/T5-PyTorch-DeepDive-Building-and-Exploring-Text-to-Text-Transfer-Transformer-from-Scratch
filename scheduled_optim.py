@@ -47,6 +47,7 @@ class ScheduledOptim:
         lr: float = self.calculate_lr()
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = lr
+        print("LR:",lr)
         self.optimizer.step()
 
     def zero_grad(self) -> None:
@@ -56,21 +57,26 @@ class ScheduledOptim:
         """
         self.optimizer.zero_grad()
 
+
     def calculate_lr(self) -> float:
-        """
-        Calculates the learning rate using an "inverse square root" schedule
-        with a warm-up phase.
+      """
+      Calculates the learning rate using an "inverse square root" schedule
+      with a warm-up phase, where the learning rate is constant during the
+      warm-up and then decreases according to the inverse square root of
+      the step number.
+      
+      Returns:
+          float: The calculated learning rate.
+      """
+      step = self.n_current_steps
+      warmup = self.n_warmup_steps
 
-        Returns:
-            float: The calculated learning rate.
-        """
-        factor: float = self.d_model ** (-0.5)
-        step: int = self.n_current_steps
-        warmup: int = self.n_warmup_steps
-
-        if step < warmup:
-            lr: float = factor * (warmup ** 0.5)
-        else:
-            lr: float = factor * (step ** -0.5) * (warmup ** 0.5)
-        
-        return lr
+      if step <= warmup:
+          # Constant learning rate during warm-up phase
+          lr = 0.01 
+      else:
+          # Decay phase starts after the warm-up
+          factor = self.d_model ** (-0.5)
+          lr = factor * ((step - warmup) ** -0.5) * (warmup ** 0.5)
+      
+      return lr

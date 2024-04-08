@@ -79,7 +79,7 @@ def run(config):
       # https://discuss.huggingface.co/t/t5-finetuning-tips/684
     """
     optim = Adafactor(t5.parameters(), scale_parameter=False, relative_step=False, warmup_init=False, lr=None)  
-    optim_schedule = ScheduledOptim(config, optim)
+    optim_schedule = ScheduledOptim(optim, config.hidden_size, config.n_warmup_steps)
 
     # Create data loaders
     batch_size = config.batch_size
@@ -118,7 +118,6 @@ if __name__ == "__main__":
         num_blocks= 8,
         n_warmup_steps= 10000,
         lr= 0.01,
-        betas= (0.9, 0.999),
         cuda_devices=None,
         with_cuda= True,
         log_freq= 10,

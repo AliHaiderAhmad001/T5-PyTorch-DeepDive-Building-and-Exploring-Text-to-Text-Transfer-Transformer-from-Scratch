@@ -21,8 +21,7 @@ class Config:
 
         # Optimizer params
         n_warmup_steps (int): Number of warmup steps for the optimizer. Default is 10000.
-        weight_decay (float): Weight decay for the optimizer. Default is 0.01.
-        lr (float): Learning rate for the optimizer. Default is 1e-4.
+        lr (float): Learning rate for the optimizer. Default is 1e-2.
         betas (tuple): Betas for the optimizer. Default is (0.9, 0.999).
 
         # Trainer params
@@ -41,7 +40,7 @@ class Config:
     def __init__(self, prop=0.15, tokenizer_path="t5-base", max_token_len=768, data_dir="dataset/train.txt",
                  hidden_size=768, bidirectional = True, num_buckets = 32, max_distance = 128,
                  vocab_size=32000, hidden_dropout_prob=0.1, num_heads=8, num_blocks=12,
-                 n_warmup_steps=10000, weight_decay=0.01, lr=1e-4, betas=(0.9, 0.999),
+                 n_warmup_steps=10000, lr=1e-2, betas=(0.9, 0.999),
                  cuda_devices=None, with_cuda=True, log_freq=10, batch_size=64, save_path='tmp/checkpoints',
                  seed=0, test_dataset=None, epochs=1):
 
@@ -69,7 +68,6 @@ class Config:
 
         # Optimizer params
         self.n_warmup_steps = n_warmup_steps
-        self.weight_decay = weight_decay
         self.lr = lr
         self.betas = betas
 

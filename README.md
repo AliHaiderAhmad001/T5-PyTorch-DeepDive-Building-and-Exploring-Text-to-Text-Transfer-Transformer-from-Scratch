@@ -9,7 +9,7 @@ Implementation for the Paper 'Exploring the Limits of Transfer Learning with a U
 
 #####################################
 
-**The project is under implementation**
+**The project is under review**
 
 #####################################
 

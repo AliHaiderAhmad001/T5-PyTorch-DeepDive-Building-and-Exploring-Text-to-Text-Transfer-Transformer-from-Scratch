@@ -55,7 +55,7 @@ The aim of the paper was to explore the most popular current transfer learning t
 
 The paper proposed (almost) the first model that combines most language tasks under a "text-to-text" format (in conjunction with the third version of the GPT-3 model, which also provided a unified framework). The input text is what is given to the model, and the output text is the corresponding result. This also means that the pre-training and fine-tuning process is consistent no matter the task.
 
-### Text-to-text approach:
+### Text-to-text approach
 
 One of the big benefits of framing language tasks into this format is that it allows us to achieve "consistency" between the pre-training objective and the fine-tuning process. What does it mean? This text-to-text framework allows us to apply the same model, objective, training procedures, and decoding process directly to every task we consider. That is, instead of designing specific structures or deleting and adding output layers that serve specific downstream task, T5 treats all tasks as the task of converting input text to output text. For example, for translation, the input text is preceded by “English to German translation:” followed by the sentence to be translated, and the model generates the translated sentence. That is, the input is as follows: `translate English to German: That is good.`
 
@@ -91,14 +91,17 @@ The T5 model undergoes a two-stage training process (like most other LM, Transfe
 - **Pre-training:** Here the model is trained on a huge set of text data using self-supervised learning tasks (or “pre-training objectives”). Through it, the model acquires general knowledge and understanding of the language that allows it to apply it to downstream tasks (such as translation or classification). The most common pre-training objectives are:
 
 1- denoising objective(MLM or BERT-style, Replace corrupted spans and Drop corrupted tokens,MASS ..etc). 
+
 2- language modeling(Prefix language modeling and Casual language modeling)
+
 3. deshuffling.
 
 Of course, in the paper, all of these types were tested and Replace corrupted spans (or I.i.d. noise, replacement spans) were adopted because it achieved the best performance according to the comparison approach they developed.
 
-- Fine-tuning: Here the model (pre-trained) is trained more and more specifically on a smaller dataset tailored to a specific task. The model is adapted such that it becomes specialized at the task and thus performs higher.
+- **Fine-tuning:** Here the model (pre-trained) is trained more and more specifically on a smaller dataset tailored to a specific task. The model is adapted such that it becomes specialized at the task and thus performs higher.
 
 Of course, the model-Encoder-decoder architecture is trained according to several pre-training approaches (or objectives), some of which are modified to fit this model architecture, and in other cases, training objectives that combine concepts from several approaches are used:
+
 
 1.Prefix language modeling:
 Input: Thank you for inviting
